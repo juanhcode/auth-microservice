@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.domain.service;
+package com.develop.auth_microservice.application.use_cases;
 
 import com.develop.auth_microservice.domain.model.Auth;
 import com.develop.auth_microservice.domain.repository.AuthRepository;
