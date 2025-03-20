@@ -1,9 +1,9 @@
-package com.develop.auth_microservice.infrastructure.controller;
+package com.develop.auth_microservice.presentation.controller;
 
 
-import com.develop.auth_microservice.domain.dto.LoginRequest;
+import com.develop.auth_microservice.application.dto.LoginRequest;
 import com.develop.auth_microservice.domain.model.Auth;
-import com.develop.auth_microservice.domain.service.AuthService;
+import com.develop.auth_microservice.application.use_cases.AuthService;
 
 import jakarta.validation.Valid;
 

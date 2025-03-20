@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.infrastructure.controller;
+package com.develop.auth_microservice.presentation.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
