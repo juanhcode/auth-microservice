@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.domain.services;
+package com.develop.auth_microservice.domain.interfaces;
 import com.develop.auth_microservice.domain.models.Auth;
 
 public interface AuthService {

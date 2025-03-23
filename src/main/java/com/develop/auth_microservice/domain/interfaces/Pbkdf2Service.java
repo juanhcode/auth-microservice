@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.domain.services;
+package com.develop.auth_microservice.domain.interfaces;
 
 
 public interface Pbkdf2Service {

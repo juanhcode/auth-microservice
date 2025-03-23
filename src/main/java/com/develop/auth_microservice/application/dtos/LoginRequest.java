@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.domain.dtos;
+package com.develop.auth_microservice.application.dtos;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

@@ -1,6 +1,9 @@
-package com.develop.auth_microservice.domain.services;
+package com.develop.auth_microservice.application.use_cases;
 
 import org.springframework.stereotype.Service;
+
+import com.develop.auth_microservice.domain.interfaces.Pbkdf2Service;
+
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;
 import java.security.NoSuchAlgorithmException;
