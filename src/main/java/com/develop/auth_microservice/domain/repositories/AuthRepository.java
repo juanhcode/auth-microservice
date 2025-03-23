@@ -1,7 +1,9 @@
-package com.develop.auth_microservice.domain.repository;
+package com.develop.auth_microservice.domain.repositories;
 
-import com.develop.auth_microservice.domain.model.Auth;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.develop.auth_microservice.domain.models.Auth;
+
 import java.util.Optional;
 
 public interface AuthRepository extends JpaRepository<Auth, Long> {
