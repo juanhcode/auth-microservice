@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.infrastructure.exception;
+package com.develop.auth_microservice.presentation.exception;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

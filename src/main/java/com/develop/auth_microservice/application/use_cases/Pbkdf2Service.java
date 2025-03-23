@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.domain.service;
+package com.develop.auth_microservice.application.use_cases;
 
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.PBEKeySpec;

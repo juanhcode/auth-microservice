@@ -1,4 +1,4 @@
-package com.develop.auth_microservice.infrastructure.controller;
+package com.develop.auth_microservice.presentation.controller;
 
 import com.develop.auth_microservice.domain.model.TestEntity;
 import com.develop.auth_microservice.domain.repository.TestRepository;
