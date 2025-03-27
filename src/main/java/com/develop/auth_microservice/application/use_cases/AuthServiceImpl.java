@@ -15,6 +15,9 @@ public class AuthServiceImpl implements AuthService { // Implementa la interfaz 
     @Autowired
     private Pbkdf2ServiceImpl pbkdf2Service;
 
+    @Autowired
+    private JWTServiceImpl jwtService;
+
     @Override
     public void register(Auth auth) {
         String salt = pbkdf2Service.generateSalt(); // Genera un salt aleatorio
@@ -25,9 +28,12 @@ public class AuthServiceImpl implements AuthService { // Implementa la interfaz 
     }
 
     @Override
-    public boolean authenticate(String email, String password) {
+    public String authenticate(String email, String password) {
         Auth auth = authRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        return pbkdf2Service.verifyHash(password, auth.getSalt(), auth.getPassword());
+        if (pbkdf2Service.verifyHash(password, auth.getSalt(), auth.getPassword())) {
+            return jwtService.generateToken(email);
+        }
+        return "Error";
     }
 }

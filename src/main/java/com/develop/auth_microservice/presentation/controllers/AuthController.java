@@ -7,6 +7,7 @@ import com.develop.auth_microservice.domain.models.Auth;
 
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
 
+    @Lazy
     @Autowired
     private AuthService authService; // Inyecta la interfaz AuthService
 
@@ -26,11 +28,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
-        boolean isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        if (isAuthenticated) {
-            return ResponseEntity.ok("Autenticación exitosa");
-        } else {
-            return ResponseEntity.status(401).body("Credenciales inválidas");
+        String isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+        if (isAuthenticated.equals("Error")) {
+            return ResponseEntity.badRequest().body("Credenciales incorrectas");
         }
+        return ResponseEntity.ok(isAuthenticated);
     }
 }
