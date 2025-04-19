@@ -3,6 +3,7 @@ package com.develop.auth_microservice.presentation.controllers;
 
 import com.develop.auth_microservice.application.dtos.LoginRequest;
 import com.develop.auth_microservice.domain.interfaces.AuthService;
+import com.develop.auth_microservice.domain.interfaces.JWTService;
 import com.develop.auth_microservice.domain.models.Auth;
 
 import jakarta.validation.Valid;
@@ -20,6 +21,10 @@ public class AuthController {
     @Autowired
     private AuthService authService; // Inyecta la interfaz AuthService
 
+    @Lazy
+    @Autowired
+    private JWTService jwtService; // Inyecta la interfaz JWTService
+
     @PostMapping("/register")
     public ResponseEntity<String> register(@Valid @RequestBody Auth auth) {
         authService.register(auth);
@@ -33,5 +38,14 @@ public class AuthController {
             return ResponseEntity.badRequest().body("Credenciales incorrectas");
         }
         return ResponseEntity.ok(isAuthenticated);
+    }
+
+    @GetMapping("/validate")
+    public ResponseEntity<?> validateToken(@RequestParam("token") String token, @RequestParam("email") String email) {
+        boolean isValid = jwtService.validateToken(token, email);
+        if (!isValid) {
+            return ResponseEntity.badRequest().body("Token inválido");
+        }
+        return ResponseEntity.ok("Token válido");
     }
 }

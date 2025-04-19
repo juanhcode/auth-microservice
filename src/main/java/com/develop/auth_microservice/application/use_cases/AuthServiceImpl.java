@@ -2,7 +2,7 @@ package com.develop.auth_microservice.application.use_cases;
 
 import com.develop.auth_microservice.domain.interfaces.AuthService;
 import com.develop.auth_microservice.domain.models.Auth;
-import com.develop.auth_microservice.domain.repositories.AuthRepository;
+import com.develop.auth_microservice.infrastructure.repositories.AuthRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
