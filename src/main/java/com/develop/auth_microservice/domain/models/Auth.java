@@ -30,9 +30,6 @@ public class Auth {
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Column(name = "rol", nullable = false)
-    private String rol;
-
     @Column(name = "salt", nullable = false)
     private String salt;
 }
