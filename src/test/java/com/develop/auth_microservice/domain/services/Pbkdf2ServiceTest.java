@@ -2,12 +2,9 @@ package com.develop.auth_microservice.domain.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.develop.auth_microservice.application.use_cases.Pbkdf2ServiceImpl;
 
-@ExtendWith(MockitoExtension.class)
 class Pbkdf2ServiceTest {
 
     private Pbkdf2ServiceImpl pbkdf2Service = new Pbkdf2ServiceImpl();

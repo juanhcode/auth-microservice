@@ -27,12 +27,8 @@ public class Auth {
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
 
-<<<<<<< HEAD
-    @Column(name = "salt", nullable = false)
-=======
     private String rol;
 
->>>>>>> develop
     private String salt;
 
 }

@@ -9,6 +9,7 @@ import com.develop.auth_microservice.domain.models.Auth;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,11 +34,11 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<String> login(@Valid @RequestBody LoginRequest loginRequest) {
-        String isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
-        if (isAuthenticated.equals("Error")) {
-            return ResponseEntity.badRequest().body("Credenciales incorrectas");
-        }
-        return ResponseEntity.ok(isAuthenticated);
+    String isAuthenticated = authService.authenticate(loginRequest.getEmail(), loginRequest.getPassword());
+    if (isAuthenticated.equals("Error")) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Credenciales incorrectas"); // Cambiado a 401
+    }
+    return ResponseEntity.ok(isAuthenticated);
     }
 
     @GetMapping("/validate")
