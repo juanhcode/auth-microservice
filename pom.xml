@@ -98,6 +98,7 @@
 			<version>5.2.0</version>
 			<scope>test</scope>
 		</dependency>
+		
 
 		<!-- https://mvnrepository.com/artifact/io.jsonwebtoken/jjwt-api -->
 		<dependency>
