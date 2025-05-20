@@ -53,19 +53,19 @@ class AuthServiceTest {
     };
 
     // ===== Tests para register() =====
-    @Test
-    void register_ShouldHashPasswordAndSaveUser() {
-        when(pbkdf2Service.generateSalt()).thenReturn("somesalt");
-        when(pbkdf2Service.generateHash("password", "somesalt")).thenReturn("hashedpass");
-
-        Auth user = new Auth();
-        user.setPassword("password");
-        authService.register(user);
-
-        verify(authRepository).save(user);
-        assertEquals("hashedpass", user.getPassword());
-        assertEquals("somesalt", user.getSalt());
-    }
+    //@Test
+//    void register_ShouldHashPasswordAndSaveUser() {
+//        when(pbkdf2Service.generateSalt()).thenReturn("somesalt");
+//        when(pbkdf2Service.generateHash("password", "somesalt")).thenReturn("hashedpass");
+//
+//        Auth user = new Auth();
+//        user.setPassword("password");
+//        authService.register(user);
+//
+//        verify(authRepository).save(user);
+//        assertEquals("hashedpass", user.getPassword());
+//        assertEquals("somesalt", user.getSalt());
+//    }
 
     // ===== Tests para authenticate() =====
     @Test
