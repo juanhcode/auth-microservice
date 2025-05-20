@@ -12,7 +12,6 @@ import com.develop.auth_microservice.domain.models.Auth;
 import com.develop.auth_microservice.domain.repositories.AuthRepositoryMock;
 import com.develop.auth_microservice.domain.repositories.JwtService;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
