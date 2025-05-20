@@ -7,9 +7,7 @@ import com.develop.auth_microservice.domain.models.Auth;
 
 import java.util.Optional;
 
-
 @Repository
 public interface AuthRepository extends JpaRepository<Auth, Long> {
     Optional<Auth> findByEmail(String email);
 }
-
