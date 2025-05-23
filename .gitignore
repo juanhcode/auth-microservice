@@ -32,3 +32,4 @@ build/
 ### VS Code ###
 .vscode/
 .env
+src/main/java/com/develop/auth_microservice/infrastructure/security/secrets.yml
