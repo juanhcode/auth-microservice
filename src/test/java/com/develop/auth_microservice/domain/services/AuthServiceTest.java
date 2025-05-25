@@ -52,21 +52,6 @@ class AuthServiceTest {
         }
     };
 
-    // ===== Tests para register() =====
-    //@Test
-//    void register_ShouldHashPasswordAndSaveUser() {
-//        when(pbkdf2Service.generateSalt()).thenReturn("somesalt");
-//        when(pbkdf2Service.generateHash("password", "somesalt")).thenReturn("hashedpass");
-//
-//        Auth user = new Auth();
-//        user.setPassword("password");
-//        authService.register(user);
-//
-//        verify(authRepository).save(user);
-//        assertEquals("hashedpass", user.getPassword());
-//        assertEquals("somesalt", user.getSalt());
-//    }
-
     // ===== Tests para authenticate() =====
     @Test
     void authenticate_ShouldReturnTokenWhenCredentialsAreValid() {
@@ -112,5 +97,104 @@ class AuthServiceTest {
         
         verify(jwtService, never()).generateToken(any()); // Verifica que NO se llamó al JwtService
     }
+
+    @Test
+    void register_ShouldHashPasswordAndSaveUser() {
+        // Arrange
+        Auth auth = new Auth();
+        auth.setPassword("plainPassword");
+        
+        when(pbkdf2Service.generateSalt()).thenReturn("generatedSalt");
+        when(pbkdf2Service.generateHash("plainPassword", "generatedSalt"))
+            .thenReturn("hashedPassword");
+
+        // Act
+        authService.register(auth);
+
+        // Assert
+        verify(pbkdf2Service).generateSalt();
+        verify(pbkdf2Service).generateHash("plainPassword", "generatedSalt");
+        verify(authRepository).save(auth);
+        
+        assertEquals("hashedPassword", auth.getPassword());
+        assertEquals("generatedSalt", auth.getSalt());
+    }
+
+    @Test
+    void authenticate_ShouldHandleDatabaseError() {
+        when(authRepository.findByEmail("test@example.com"))
+            .thenThrow(new RuntimeException("Database error"));
+        
+        assertThrows(RuntimeException.class, () -> {
+            authService.authenticate("test@example.com", "anypass");
+        });
+    }
+
+    @Test
+    void authenticate_ShouldHandleVeryLongPassword() {
+        Auth auth = new Auth();
+        auth.setSalt("salt");
+        auth.setPassword("hashedLongPass");
+
+        String longPassword = "a".repeat(1000);
+
+        when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
+        when(pbkdf2Service.verifyHash(longPassword, "salt", "hashedLongPass")).thenReturn(true);
+        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+
+        assertDoesNotThrow(() -> {
+            authService.authenticate("test@example.com", longPassword);
+        });
+    }
+
+    @Test
+    void authenticate_ShouldHandleSpecialCharacters() {
+        Auth auth = new Auth();
+        auth.setSalt("salt");
+        auth.setPassword("hashedSpecialPass");
+
+        String specialPassword = "p@$$w0rd!áéíóú";
+
+        when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
+        when(pbkdf2Service.verifyHash(specialPassword, "salt", "hashedSpecialPass")).thenReturn(true);
+        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+
+        assertDoesNotThrow(() -> {
+            authService.authenticate("test@example.com", specialPassword);
+        });
+    }
+
+    @Test
+    void register_ShouldNotSaveUserWhenHashingFails() {
+        Auth auth = new Auth();
+        auth.setPassword("plainPassword");
+
+        when(pbkdf2Service.generateSalt()).thenReturn("salt");
+        when(pbkdf2Service.generateHash(anyString(), anyString()))
+                .thenThrow(new RuntimeException("Hashing failed"));
+
+        assertThrows(RuntimeException.class, () -> {
+            authService.register(auth);
+        });
+
+        verify(authRepository, never()).save(any());
+    }
+
+    @Test
+    void authenticate_ShouldVerifyPasswordExactlyOnce() {
+        Auth auth = new Auth();
+        auth.setSalt("salt");
+        auth.setPassword("hashedpass");
+
+        when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
+        when(pbkdf2Service.verifyHash("validpass", "salt", "hashedpass")).thenReturn(true);
+        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+
+        authService.authenticate("test@example.com", "validpass");
+
+        verify(pbkdf2Service, times(1))
+                .verifyHash("validpass", "salt", "hashedpass");
+    }
+
 
 }
