@@ -4,9 +4,11 @@ import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
 
 import com.develop.auth_microservice.application.use_cases.Pbkdf2ServiceImpl;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Base64;
-
+@ExtendWith(MockitoExtension.class)
 class Pbkdf2ServiceTest {
 
     private Pbkdf2ServiceImpl pbkdf2Service = new Pbkdf2ServiceImpl();
