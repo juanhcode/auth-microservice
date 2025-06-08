@@ -6,7 +6,7 @@ on:
       - main
 
 env:
-  IMAGE_NAME: juanhoyos/microservice:auth-v9
+  IMAGE_NAME: juanhoyos/microservice:auth-v10
   REGISTRY: docker.io
 
 jobs:
