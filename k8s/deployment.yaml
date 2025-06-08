@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: auth-microservice
-          image: juanhoyos/microservice:auth-v9
+          image: juanhoyos/microservice:auth-v10
           ports:
             - containerPort: 8082
           env:
