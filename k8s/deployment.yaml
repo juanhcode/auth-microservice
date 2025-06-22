@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: auth-microservice
-          image: juanhoyos/microservice:auth-v16
+          image: juanhoyos/microservice:auth-v17
           ports:
             - containerPort: 8082
           env:
@@ -42,6 +42,11 @@ spec:
                 secretKeyRef:
                   name: credentials
                   key: jwt
+            - name: FEIGN_CLIENT_URL
+              valueFrom:
+                secretKeyRef:
+                  name: credentials
+                  key: feignClientUrl
           resources:
             limits:
               memory: "512Mi"
