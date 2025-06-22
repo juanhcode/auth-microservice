@@ -21,9 +21,8 @@ public class JWTServiceImpl implements JWTService {
     private String secretKey = "${JWT_SECRET_KEY}";
 
     @Override
-    public String generateToken(String email, Integer role) {
+    public String generateToken(String email) {
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", role);
         return Jwts.builder()
                 .claims()
                 .add(claims)

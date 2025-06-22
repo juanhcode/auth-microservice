@@ -37,7 +37,7 @@ public class AuthServiceImpl implements AuthService { // Implementa la interfaz 
             // Obtenemos el rol del usuario
             System.out.println("Estos son los datos del usuario: " + auth);
             Integer role = users.getRoleId();
-            return jwtService.generateToken(email, role);
+            return jwtService.generateToken(email);
         }
         return "Error";
     }
