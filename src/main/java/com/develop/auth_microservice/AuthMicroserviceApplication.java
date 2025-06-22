@@ -12,6 +12,7 @@ import org.springframework.cloud.openfeign.EnableFeignClients;
 public class AuthMicroserviceApplication {
 
 	public static void main(String[] args) {
+		System.out.println("Starting Auth Microservice...");
 		SpringApplication.run(AuthMicroserviceApplication.class, args);
 	}
 
