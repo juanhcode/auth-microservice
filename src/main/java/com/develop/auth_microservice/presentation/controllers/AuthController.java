@@ -2,16 +2,19 @@ package com.develop.auth_microservice.presentation.controllers;
 
 
 import com.develop.auth_microservice.application.dtos.LoginRequest;
+import com.develop.auth_microservice.application.dtos.RegisterRequest;
 import com.develop.auth_microservice.domain.interfaces.AuthService;
 import com.develop.auth_microservice.domain.interfaces.JWTService;
-import com.develop.auth_microservice.domain.models.Auth;
 
+import com.develop.auth_microservice.infrastructure.clients.UsersClientRest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Collections;
 
 
 @RestController
@@ -26,10 +29,15 @@ public class AuthController {
     @Autowired
     private JWTService jwtService; // Inyecta la interfaz JWTService
 
+    @Lazy
+    @Autowired
+    private UsersClientRest usersClientRest; // Inyecta el cliente REST de usuarios
+
     @PostMapping("/register")
-    public ResponseEntity<String> register(@Valid @RequestBody Auth auth) {
-        authService.register(auth);
-        return ResponseEntity.ok("Usuario registrado exitosamente");
+    public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        authService.register(registerRequest.getAuth());
+        usersClientRest.createdUser(registerRequest.getUser());
+        return ResponseEntity.ok(Collections.singletonMap("message", "Usuario registrado exitosamente"));
     }
 
     @PostMapping("/login")

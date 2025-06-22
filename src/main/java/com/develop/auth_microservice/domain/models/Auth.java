@@ -19,6 +19,7 @@ public class Auth {
     @Column(name = "id_user")
     private Long idUser;
 
+    @Column(unique = true)
     @NotBlank(message = "El email no puede estar vacío")
     @Email(message = "El email debe tener un formato válido")
     private String email;
@@ -26,8 +27,6 @@ public class Auth {
     @NotBlank(message = "La contraseña no puede estar vacía")
     @Size(min = 6, message = "La contraseña debe tener al menos 6 caracteres")
     private String password;
-
-    private String rol;
 
     private String salt;
 
