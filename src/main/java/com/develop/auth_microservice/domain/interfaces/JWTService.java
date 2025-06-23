@@ -9,7 +9,7 @@ import java.util.function.Function;
 
 public interface JWTService {
     String extractEmail(String token); // Método para extraer el correo electrónico del token
-    String generateToken(String email); // Método para generar un token
+    String generateToken(String email, String role); // Método para generar un token
     boolean validateToken(String token, String email); // Método para validar el token
     Claims extractAllClaims(String token); // Método para extraer todas las reclamaciones del token
     <T> T extractClaim(String token, Function<Claims, T> claimsResolver); // Método para extraer una reclamación específica del token
