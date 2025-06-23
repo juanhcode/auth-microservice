@@ -7,6 +7,7 @@ import com.develop.auth_microservice.domain.interfaces.AuthService;
 import com.develop.auth_microservice.domain.interfaces.JWTService;
 
 import com.develop.auth_microservice.infrastructure.clients.UsersClientRest;
+import com.develop.auth_microservice.infrastructure.clients.models.Users;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,8 +37,9 @@ public class AuthController {
 
     @PostMapping("/register")
     public ResponseEntity<?> register(@Valid @RequestBody RegisterRequest registerRequest) {
+        Users createdUser = usersClientRest.createdUser(registerRequest.getUser());
+        registerRequest.getAuth().setIdUser(Long.valueOf(createdUser.getId()));
         authService.register(registerRequest.getAuth());
-        usersClientRest.createdUser(registerRequest.getUser());
         return ResponseEntity.ok(Collections.singletonMap("message", "Usuario registrado exitosamente"));
     }
 
