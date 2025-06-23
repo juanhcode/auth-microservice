@@ -10,5 +10,5 @@ public class Users {
     private String email;
     private String address;
     private boolean enabled;
-    private Integer roleId;
+    private Role role;
 }
