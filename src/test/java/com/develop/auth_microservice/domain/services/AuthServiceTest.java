@@ -2,19 +2,20 @@ package com.develop.auth_microservice.domain.services;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.*;
 
 import java.util.Optional;
 
 import com.develop.auth_microservice.domain.interfaces.AuthService;
+import com.develop.auth_microservice.domain.interfaces.JWTService;
 import com.develop.auth_microservice.domain.interfaces.Pbkdf2Service;
 import com.develop.auth_microservice.domain.models.Auth;
-import com.develop.auth_microservice.domain.repositories.AuthRepositoryMock;
-import com.develop.auth_microservice.domain.repositories.JwtService;
+import com.develop.auth_microservice.infrastructure.clients.models.Users;
+import com.develop.auth_microservice.infrastructure.repositories.AuthRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -22,15 +23,13 @@ import org.mockito.junit.jupiter.MockitoExtension;
 class AuthServiceTest {
 
     @Mock
-    private AuthRepositoryMock authRepository;
+    private AuthRepository authRepository;
 
     @Mock
     private Pbkdf2Service pbkdf2Service;
 
     @Mock
-    private JwtService jwtService; // Mock añadido para JWT
-
-    @InjectMocks
+    private JWTService jwtService; // Mock actualizado para JWT    @InjectMocks
     private AuthService authService = new AuthService() {
         @Override
         public void register(Auth auth) {
@@ -45,15 +44,16 @@ class AuthServiceTest {
         public String authenticate(String email, String password) {
             Auth auth = authRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+            Users users = new Users();
+            users.setRoleId(1); // Simulamos un rol para pruebas
             if (pbkdf2Service.verifyHash(password, auth.getSalt(), auth.getPassword())) {
-                return jwtService.generateToken(email); // Usa el JwtService mockeado
+                return jwtService.generateToken(email, users.getRoleId()); // Usa el JwtService mockeado con rol
             }
             return "Error";
         }
     };
 
-    // ===== Tests para authenticate() =====
-    @Test
+    // ===== Tests para authenticate() =====    @Test
     void authenticate_ShouldReturnTokenWhenCredentialsAreValid() {
         // Configuración del mock
         Auth auth = new Auth();
@@ -62,14 +62,14 @@ class AuthServiceTest {
         
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
         when(pbkdf2Service.verifyHash("validpass", "salt", "hashedpass")).thenReturn(true);
-        when(jwtService.generateToken("test@example.com")).thenReturn("fake.jwt.token"); // Mock de JWT
+        when(jwtService.generateToken(eq("test@example.com"), anyInt())).thenReturn("fake.jwt.token"); // Mock de JWT actualizado
 
         // Ejecución
         String result = authService.authenticate("test@example.com", "validpass");
 
         // Verificación
         assertEquals("fake.jwt.token", result); // Verifica el token retornado
-        verify(jwtService).generateToken("test@example.com"); // Verifica que se llamó al JwtService
+        verify(jwtService).generateToken(eq("test@example.com"), anyInt()); // Verifica que se llamó al JwtService con cualquier rol
     }
 
     @Test
@@ -84,7 +84,7 @@ class AuthServiceTest {
         String result = authService.authenticate("test@example.com", "wrongpass");
         
         assertEquals("Error", result);
-        verify(jwtService, never()).generateToken(any()); // Verifica que NO se llamó al JwtService
+        verify(jwtService, never()).generateToken(anyString(), anyInt()); // Verifica que NO se llamó al JwtService
     }
 
     @Test
@@ -95,7 +95,7 @@ class AuthServiceTest {
             authService.authenticate("nonexistent@example.com", "anypass");
         });
         
-        verify(jwtService, never()).generateToken(any()); // Verifica que NO se llamó al JwtService
+        verify(jwtService, never()).generateToken(anyString(), anyInt()); // Verifica que NO se llamó al JwtService
     }
 
     @Test
@@ -139,8 +139,7 @@ class AuthServiceTest {
         String longPassword = "a".repeat(1000);
 
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
-        when(pbkdf2Service.verifyHash(longPassword, "salt", "hashedLongPass")).thenReturn(true);
-        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+        when(pbkdf2Service.verifyHash(longPassword, "salt", "hashedLongPass")).thenReturn(true);        when(jwtService.generateToken(eq("test@example.com"), anyInt())).thenReturn("token");
 
         assertDoesNotThrow(() -> {
             authService.authenticate("test@example.com", longPassword);
@@ -156,8 +155,7 @@ class AuthServiceTest {
         String specialPassword = "p@$$w0rd!áéíóú";
 
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
-        when(pbkdf2Service.verifyHash(specialPassword, "salt", "hashedSpecialPass")).thenReturn(true);
-        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+        when(pbkdf2Service.verifyHash(specialPassword, "salt", "hashedSpecialPass")).thenReturn(true);        when(jwtService.generateToken(eq("test@example.com"), anyInt())).thenReturn("token");
 
         assertDoesNotThrow(() -> {
             authService.authenticate("test@example.com", specialPassword);
@@ -187,8 +185,7 @@ class AuthServiceTest {
         auth.setPassword("hashedpass");
 
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
-        when(pbkdf2Service.verifyHash("validpass", "salt", "hashedpass")).thenReturn(true);
-        when(jwtService.generateToken("test@example.com")).thenReturn("token");
+        when(pbkdf2Service.verifyHash("validpass", "salt", "hashedpass")).thenReturn(true);        when(jwtService.generateToken(eq("test@example.com"), anyInt())).thenReturn("token");
 
         authService.authenticate("test@example.com", "validpass");
 

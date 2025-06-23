@@ -18,13 +18,10 @@ public class AuthTest {
         ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
         validator = factory.getValidator();
         auth = new Auth();
-    }
-
-    @Test
+    }    @Test
     void testValidAuth() {
         auth.setEmail("test@example.com");
         auth.setPassword("password123");
-        auth.setRol("USER");
         auth.setSalt("randomSalt");
 
         var violations = validator.validate(auth);
@@ -81,34 +78,23 @@ public class AuthTest {
         Long idUser = 1L;
         auth.setIdUser(idUser);
         assertEquals(idUser, auth.getIdUser(), "El ID del usuario debería coincidir");
-    }
-
-    @Test
-    void testRolGetterAndSetter() {
-        String rol = "ADMIN";
-        auth.setRol(rol);
-        assertEquals(rol, auth.getRol(), "El rol debería coincidir");
-    }
+    }    // Test de rol eliminado ya que el campo no existe en el modelo actualizado
 
     @Test
     void testSaltGetterAndSetter() {
         String salt = "randomSaltValue";
         auth.setSalt(salt);
         assertEquals(salt, auth.getSalt(), "El salt debería coincidir");
-    }
-
-    @Test
+    }    @Test
     void testToString() {
         auth.setEmail("test@example.com");
         auth.setPassword("password123");
-        auth.setRol("USER");
         auth.setSalt("salt123");
 
         String toString = auth.toString();
         
         assertTrue(toString.contains("test@example.com"), "ToString debería contener el email");
         assertTrue(toString.contains("password123"), "ToString debería contener la contraseña");
-        assertTrue(toString.contains("USER"), "ToString debería contener el rol");
         assertTrue(toString.contains("salt123"), "ToString debería contener el salt");
     }
 
