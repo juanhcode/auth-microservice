@@ -15,7 +15,6 @@ import lombok.ToString;
 public class Auth {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_user")
     private Long idUser;
 

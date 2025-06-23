@@ -1,6 +1,5 @@
 package com.develop.auth_microservice.application.use_cases;
 
-import com.develop.auth_microservice.application.dtos.RegisterRequest;
 import com.develop.auth_microservice.domain.interfaces.AuthService;
 import com.develop.auth_microservice.domain.models.Auth;
 import com.develop.auth_microservice.infrastructure.clients.UsersClientRest;
@@ -48,6 +47,7 @@ public class AuthServiceImpl implements AuthService { // Implementa la interfaz 
             // Obtenemos el rol del usuario
             List<Users> users = usersClientRest.getUser("Bearer " +  serviceToken, requestBody);
             Users user = users.get(0);
+            System.out.println("Usuario obtenido: " + users);
             return jwtService.generateToken(email, user.getRole().getName());
         }
         return "Error";
