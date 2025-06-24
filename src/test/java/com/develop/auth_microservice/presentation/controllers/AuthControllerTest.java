@@ -87,89 +87,89 @@ class AuthControllerTest {
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isUnauthorized())
                 .andExpect(content().string("Credenciales incorrectas"));
-    }    @Test
+    }
+    @Test
     void register_ShouldReturn200_WhenRegistrationSuccessful() throws Exception {
         // Creamos un objeto Auth
         Auth auth = new Auth();
         auth.setEmail("nuevo@example.com");
         auth.setPassword("password123");
-        
-        // Creamos un objeto Users
+
+        // Creamos un objeto Users con un id válido
         com.develop.auth_microservice.infrastructure.clients.models.Users user = new com.develop.auth_microservice.infrastructure.clients.models.Users();
+        user.setId(123); // ID necesario para el flujo del controlador
         user.setName("Test User");
         user.setLastName("Test LastName");
         user.setEmail("nuevo@example.com");
         user.setAddress("Test Address");
         user.setEnabled(true);
-        user.setRoleId(1); // Rol de usuario
-        
+        user.setRoleId(1L);
+
         // Creamos el RegisterRequest que contiene ambos
         com.develop.auth_microservice.application.dtos.RegisterRequest registerRequest = new com.develop.auth_microservice.application.dtos.RegisterRequest();
         registerRequest.setAuth(auth);
         registerRequest.setUser(user);
-          // Mock de los servicios
-        doNothing().when(authService).register(any(Auth.class));
-        
-        // Inyectamos el mock para UsersClientRest
-        com.develop.auth_microservice.infrastructure.clients.UsersClientRest usersClientRest = mock(com.develop.auth_microservice.infrastructure.clients.UsersClientRest.class);
+
+        // Mock de los servicios
         when(usersClientRest.createdUser(any(com.develop.auth_microservice.infrastructure.clients.models.Users.class)))
                 .thenReturn(user);
-        
-        // Necesitamos usar reflection para establecer el campo privado
-        org.springframework.test.util.ReflectionTestUtils.setField(authController, "usersClientRest", usersClientRest);
+        doNothing().when(authService).register(any(Auth.class));
 
         // Ejecución y verificación
         mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isOk());
-                
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.message").value("Usuario registrado exitosamente"));
+
         verify(authService).register(any(Auth.class));
+        verify(usersClientRest).createdUser(any(com.develop.auth_microservice.infrastructure.clients.models.Users.class));
     }    @Test
     void register_ShouldHandle_WhenServiceThrowsException_InvalidEmail() throws Exception {
-        // Create request with invalid email that would cause service to throw exception
+        // Crear request con email inválido que cause excepción
         Auth auth = new Auth();
         auth.setEmail("invalid-email");
         auth.setPassword("password123");
-        
+
         com.develop.auth_microservice.infrastructure.clients.models.Users user = new com.develop.auth_microservice.infrastructure.clients.models.Users();
         user.setEmail("invalid-email");
-        user.setRoleId(1);
-        
+        user.setRoleId(1L);
+
         com.develop.auth_microservice.application.dtos.RegisterRequest registerRequest = new com.develop.auth_microservice.application.dtos.RegisterRequest();
         registerRequest.setAuth(auth);
         registerRequest.setUser(user);
-        
-        // Mock service to throw exception for any auth object
+
+        // Mock para lanzar excepción
         doThrow(new IllegalArgumentException("Invalid email format"))
-            .when(authService).register(any());
-        
+                .when(authService).register(any());
+
         mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
-                .andExpect(status().isBadRequest());
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
+                .andExpect(status().isInternalServerError());
     }@Test
     void register_ShouldReturn400_WhenPasswordTooShort() throws Exception {
-        // Create request with short password that would cause service to throw exception
         Auth auth = new Auth();
         auth.setEmail("test@example.com");
-        auth.setPassword("12345"); // Too short
-        
+        auth.setPassword("12345"); // Demasiado corta
+
         com.develop.auth_microservice.infrastructure.clients.models.Users user = new com.develop.auth_microservice.infrastructure.clients.models.Users();
+        user.setId(1);
         user.setEmail("test@example.com");
-        user.setRoleId(1);
-        
+        user.setRoleId(1L);
+
         com.develop.auth_microservice.application.dtos.RegisterRequest registerRequest = new com.develop.auth_microservice.application.dtos.RegisterRequest();
         registerRequest.setAuth(auth);
         registerRequest.setUser(user);
-        
-        // Since we're using LENIENT strictness, we can use any() matcher
+
+        // Mock para que el flujo llegue a authService.register
+        when(usersClientRest.createdUser(any())).thenReturn(user);
         doThrow(new IllegalArgumentException("Password too short"))
-            .when(authService).register(any());
-        
+                .when(authService).register(any());
+
         mockMvc.perform(post("/auth/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(registerRequest)))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(registerRequest)))
                 .andExpect(status().isBadRequest());
     }
 

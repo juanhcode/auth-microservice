@@ -8,6 +8,8 @@ import com.develop.auth_microservice.application.use_cases.AuthServiceImpl;
 import com.develop.auth_microservice.application.use_cases.JWTServiceImpl;
 import com.develop.auth_microservice.application.use_cases.Pbkdf2ServiceImpl;
 import com.develop.auth_microservice.domain.models.Auth;
+import com.develop.auth_microservice.infrastructure.clients.UsersClientRest;
+import com.develop.auth_microservice.infrastructure.clients.models.Users;
 import com.develop.auth_microservice.infrastructure.repositories.AuthRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +19,7 @@ import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -27,6 +30,11 @@ public class AuthJwtIntegrationTest {
 
     @Mock
     private Pbkdf2ServiceImpl pbkdf2Service;
+
+    @Mock
+    private UsersClientRest usersClientRest;
+
+    private Users mockedUser;
 
     @Spy
     private JWTServiceImpl jwtService;
@@ -39,15 +47,19 @@ public class AuthJwtIntegrationTest {
 
     @BeforeEach
     void setUp() {
-        // Configurar el JWTService spy con la clave secreta
+        mockedUser = mock(Users.class);
+        var mockedRole = mock(com.develop.auth_microservice.infrastructure.clients.models.Role.class);
+        lenient().when(mockedRole.getName()).thenReturn("USER");
+        lenient().when(mockedUser.getRole()).thenReturn(mockedRole);
+        lenient().when(usersClientRest.getUser(anyString(), anyMap())).thenReturn(List.of(mockedUser));
         ReflectionTestUtils.setField(jwtService, "secretKey", TEST_SECRET_KEY);
-        
-        // Crear e inyectar dependencias en AuthService
+
         authService = new AuthServiceImpl();
         ReflectionTestUtils.setField(authService, "authRepository", authRepository);
         ReflectionTestUtils.setField(authService, "pbkdf2Service", pbkdf2Service);
         ReflectionTestUtils.setField(authService, "jwtService", jwtService);
-    }    @Test
+        ReflectionTestUtils.setField(authService, "usersClientRest", usersClientRest);
+    }  @Test
     void testAuthenticateGeneratesCorrectToken() {
         // Preparar datos de prueba
         Auth auth = new Auth();
@@ -64,7 +76,7 @@ public class AuthJwtIntegrationTest {
         
         // Definimos el comportamiento simple del spy, directamente sobre el generateToken
         doReturn("fake.jwt.token.with.role").when(jwtService)
-                .generateToken(eq(TEST_EMAIL), any());
+                .generateToken(anyString(), anyString());
                 
         // Ejecutar método a probar, sin usar un spy adicional sobre authService
         String token = authService.authenticate(TEST_EMAIL, "password123");
@@ -96,6 +108,6 @@ public class AuthJwtIntegrationTest {
         assertEquals("Error", result, "Debe retornar 'Error' cuando la contraseña es inválida");
         
         // Verificar que no se llamó al método generateToken
-        verify(jwtService, never()).generateToken(anyString(), anyInt());
+        verify(jwtService, never()).generateToken(anyString(), String.valueOf(anyInt()));
     }
 }

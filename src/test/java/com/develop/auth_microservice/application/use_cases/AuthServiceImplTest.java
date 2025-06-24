@@ -5,6 +5,9 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
 import com.develop.auth_microservice.domain.models.Auth;
+import com.develop.auth_microservice.infrastructure.clients.UsersClientRest;
+import com.develop.auth_microservice.infrastructure.clients.models.Role;
+import com.develop.auth_microservice.infrastructure.clients.models.Users;
 import com.develop.auth_microservice.infrastructure.repositories.AuthRepository;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -14,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
@@ -30,6 +34,9 @@ public class AuthServiceImplTest {
 
     @InjectMocks
     private AuthServiceImpl authService;
+
+    @Mock
+    private UsersClientRest usersClientRest;
 
     @BeforeEach
     void setUp() {
@@ -56,29 +63,42 @@ public class AuthServiceImplTest {
         
         assertEquals("hashedPassword", auth.getPassword());
         assertEquals("generatedSalt", auth.getSalt());
-    }    @Test
+    }
+    @Test
     void authenticate_ShouldReturnTokenWithRole() {
         // Arrange
         Auth auth = new Auth();
         auth.setEmail("test@example.com");
         auth.setSalt("salt");
         auth.setPassword("hashedpass");
-        
+
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
         when(pbkdf2Service.verifyHash("validpass", "salt", "hashedpass")).thenReturn(true);
-        
-        // Configuramos el mock para el jwtService con un valor nulo para el roleId
-        // ya que en la implementación se está usando un Users recién creado con roleId = null
-        when(jwtService.generateToken(eq("test@example.com"), isNull()))
-            .thenReturn("fake.jwt.token.with.role");
+
+        // Mock para el token de servicio
+        when(jwtService.generateToken("service-user", "default-role"))
+                .thenReturn("service-token");
+
+        // Mock para el usuario y su rol
+        Role role = new Role();
+        role.setName("ROLE_USER");
+        Users user = new Users();
+        user.setRole(role);
+        List<Users> usersList = List.of(user);
+
+        when(usersClientRest.getUser(eq("Bearer service-token"), anyMap()))
+                .thenReturn(usersList);
+
+        // Mock para el token final
+        when(jwtService.generateToken("test@example.com", "ROLE_USER"))
+                .thenReturn("fake.jwt.token.with.role");
 
         // Act
         String result = authService.authenticate("test@example.com", "validpass");
 
         // Assert
         assertEquals("fake.jwt.token.with.role", result);
-        // Verificamos que se llama al generateToken con un valor null de rol
-        verify(jwtService).generateToken(eq("test@example.com"), isNull());
+        verify(jwtService).generateToken("test@example.com", "ROLE_USER");
     }
 
     @Test
@@ -88,16 +108,15 @@ public class AuthServiceImplTest {
         auth.setEmail("test@example.com");
         auth.setSalt("salt");
         auth.setPassword("hashedpass");
-        
+
         when(authRepository.findByEmail("test@example.com")).thenReturn(Optional.of(auth));
         when(pbkdf2Service.verifyHash("wrongpass", "salt", "hashedpass")).thenReturn(false);
 
         // Act
         String result = authService.authenticate("test@example.com", "wrongpass");
-
         // Assert
         assertEquals("Error", result);
-        verify(jwtService, never()).generateToken(anyString(), anyInt());
+        verify(jwtService, never()).generateToken(anyString(), anyString());
     }
 
     @Test
@@ -111,6 +130,6 @@ public class AuthServiceImplTest {
         });
         
         assertEquals("Usuario no encontrado", exception.getMessage());
-        verify(jwtService, never()).generateToken(anyString(), anyInt());
+        verify(jwtService, never()).generateToken(anyString(), String.valueOf(anyInt()));
     }
 }

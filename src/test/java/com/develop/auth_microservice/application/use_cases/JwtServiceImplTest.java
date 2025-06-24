@@ -30,63 +30,57 @@ public class JwtServiceImplTest {
 
     @Test
     void generateToken_ShouldCreateValidToken() {
-        // Generar token con el nuevo parámetro role
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
 
-        // Verificar que el token no sea nulo
         assertNotNull(token, "El token no debería ser nulo");
-        
-        // Verificar que el token pueda ser parseado
+
         assertDoesNotThrow(() -> {
             Jwts.parser()
-                .verifyWith(jwtService.getKey())
-                .build()
-                .parseSignedClaims(token);
+                    .verifyWith(jwtService.getKey())
+                    .build()
+                    .parseSignedClaims(token);
         }, "El token debería poder ser parseado");
 
-        // Verificar que el email en el token sea correcto
-        assertEquals(TEST_EMAIL, jwtService.extractEmail(token), 
-            "El email extraído del token debería coincidir con el email original");
-            
-        // Verificar que el rol en el token sea correcto
-        Integer roleFromToken = jwtService.extractClaim(token, claims -> claims.get("role", Integer.class));
-        assertEquals(TEST_ROLE, roleFromToken, 
-            "El rol extraído del token debería coincidir con el rol original");
+        assertEquals(TEST_EMAIL, jwtService.extractEmail(token),
+                "El email extraído del token debería coincidir con el email original");
+
+        String roleFromTokenStr = jwtService.extractClaim(token, claims -> claims.get("role", String.class));
+        Integer roleFromToken = Integer.valueOf(roleFromTokenStr);
+        assertEquals(TEST_ROLE, roleFromToken,
+                "El rol extraído del token debería coincidir con el rol original");
     }
 
     @Test
     void validateToken_ShouldReturnTrueForValidToken() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         assertTrue(jwtService.validateToken(token, TEST_EMAIL),
             "El token válido debería ser validado correctamente");
     }
 
     @Test
     void validateToken_ShouldReturnFalseForInvalidEmail() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         assertFalse(jwtService.validateToken(token, "wrong@example.com"),
             "El token debería ser inválido para un email diferente");
     }
 
     @Test
     void extractAllClaims_ShouldReturnValidClaims() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         Claims claims = jwtService.extractAllClaims(token);
-        
+
         assertNotNull(claims, "Los claims no deberían ser nulos");
-        assertEquals(TEST_EMAIL, claims.getSubject(), 
-            "El subject del claim debería ser el email");
-        assertEquals(TEST_ROLE, claims.get("role", Integer.class),
-            "El rol en los claims debería ser el correcto");    
-        assertNotNull(claims.getExpiration(), 
-            "La fecha de expiración no debería ser nula");
-        assertNotNull(claims.getIssuedAt(), 
-            "La fecha de emisión no debería ser nula");
+        assertEquals(TEST_EMAIL, claims.getSubject(), "El subject del claim debería ser el email");
+        String roleFromTokenStr = claims.get("role", String.class);
+        Integer roleFromToken = Integer.valueOf(roleFromTokenStr);
+        assertEquals(TEST_ROLE, roleFromToken, "El rol en los claims debería ser el correcto");
+        assertNotNull(claims.getExpiration(), "La fecha de expiración no debería ser nula");
+        assertNotNull(claims.getIssuedAt(), "La fecha de emisión no debería ser nula");
     }
 
     @Test
     void extractEmail_ShouldReturnEmailFromToken() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         String extractedEmail = jwtService.extractEmail(token);
         assertEquals(TEST_EMAIL, extractedEmail, 
             "El email extraído debería coincidir con el original");
@@ -94,7 +88,7 @@ public class JwtServiceImplTest {
 
     @Test
     void extractExpiration_ShouldReturnExpirationDate() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         Date expiration = jwtService.extractExpiration(token);
         
         assertNotNull(expiration, "La fecha de expiración no debería ser nula");
@@ -104,7 +98,7 @@ public class JwtServiceImplTest {
 
     @Test
     void isTokenExpired_ShouldReturnFalseForValidToken() {
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE);
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE));
         assertFalse(jwtService.isTokenExpired(token),
             "Un token recién generado no debería estar expirado");
     }

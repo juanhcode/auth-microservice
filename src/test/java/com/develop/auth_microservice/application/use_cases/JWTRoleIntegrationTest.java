@@ -28,44 +28,44 @@ public class JWTRoleIntegrationTest {
     @Test
     void testTokenIncludesRole_User() {
         // Generar token con rol de usuario
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE_USER);
-        
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE_USER));
+
         // Extraer claims y verificar el rol
         Claims claims = jwtService.extractAllClaims(token);
-        assertEquals(TEST_ROLE_USER, claims.get("role", Integer.class), 
-            "El token debe incluir el rol de usuario correcto");
+        assertEquals(String.valueOf(TEST_ROLE_USER), claims.get("role", String.class),
+                "El token debe incluir el rol de usuario correcto");
     }
 
     @Test
     void testTokenIncludesRole_Admin() {
         // Generar token con rol de administrador
-        String token = jwtService.generateToken(TEST_EMAIL, TEST_ROLE_ADMIN);
-        
+        String token = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE_ADMIN));
+
         // Extraer claims y verificar el rol
         Claims claims = jwtService.extractAllClaims(token);
-        assertEquals(TEST_ROLE_ADMIN, claims.get("role", Integer.class), 
-            "El token debe incluir el rol de administrador correcto");
+        assertEquals(String.valueOf(TEST_ROLE_ADMIN), claims.get("role", String.class),
+                "El token debe incluir el rol de administrador correcto");
     }
-    
+
     @Test
     void testTokenIncludesRole_DifferentTokensForDifferentRoles() {
         // Generar tokens con roles diferentes
-        String tokenUser = jwtService.generateToken(TEST_EMAIL, TEST_ROLE_USER);
-        String tokenAdmin = jwtService.generateToken(TEST_EMAIL, TEST_ROLE_ADMIN);
-        
+        String tokenUser = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE_USER));
+        String tokenAdmin = jwtService.generateToken(TEST_EMAIL, String.valueOf(TEST_ROLE_ADMIN));
+
         // Verificar que los tokens son diferentes
-        assertNotEquals(tokenUser, tokenAdmin, 
-            "Los tokens para diferentes roles deben ser diferentes");
-            
+        assertNotEquals(tokenUser, tokenAdmin,
+                "Los tokens para diferentes roles deben ser diferentes");
+
         // Verificar que ambos tienen el email correcto
         assertEquals(TEST_EMAIL, jwtService.extractEmail(tokenUser));
         assertEquals(TEST_EMAIL, jwtService.extractEmail(tokenAdmin));
-        
+
         // Verificar que los roles extraídos son diferentes
         Claims userClaims = jwtService.extractAllClaims(tokenUser);
         Claims adminClaims = jwtService.extractAllClaims(tokenAdmin);
-        
-        assertEquals(TEST_ROLE_USER, userClaims.get("role", Integer.class));
-        assertEquals(TEST_ROLE_ADMIN, adminClaims.get("role", Integer.class));
+
+        assertEquals(String.valueOf(TEST_ROLE_USER), userClaims.get("role", String.class));
+        assertEquals(String.valueOf(TEST_ROLE_ADMIN), adminClaims.get("role", String.class));
     }
 }
