@@ -33,4 +33,30 @@ public class GlobalExceptionHandler {
         errors.put("error", "A required value is missing: " + ex.getMessage());
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errors);
     }
+    @ExceptionHandler(feign.FeignException.class)
+    public ResponseEntity<Map<String, String>> handleFeignException(feign.FeignException ex) {
+        Map<String, String> errors = new HashMap<>();
+        String userMessage = "Servicio de usuarios no disponible";
+        int status = HttpStatus.SERVICE_UNAVAILABLE.value();
+
+        try {
+            String responseBody = ex.contentUTF8();
+            if (responseBody != null && responseBody.contains("\"message\"")) {
+                int start = responseBody.indexOf("\"message\":\"") + 11;
+                int end = responseBody.indexOf("\"", start);
+                userMessage = responseBody.substring(start, end);
+            }
+            if (responseBody != null && responseBody.contains("\"status\":")) {
+                int statusStart = responseBody.indexOf("\"status\":") + 9;
+                int statusEnd = responseBody.indexOf(",", statusStart);
+                if (statusEnd == -1) statusEnd = responseBody.length() - 1;
+                String statusStr = responseBody.substring(statusStart, statusEnd).replaceAll("[^0-9]", "");
+                status = Integer.parseInt(statusStr);
+            }
+        } catch (Exception ignored) {}
+
+        errors.put("error", userMessage);
+        return ResponseEntity.status(status).body(errors);
+    }
+
 }
