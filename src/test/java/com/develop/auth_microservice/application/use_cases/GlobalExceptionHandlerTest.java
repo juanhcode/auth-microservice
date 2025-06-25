@@ -103,4 +103,55 @@ class GlobalExceptionHandlerTest {
         assertEquals(503, response.getStatusCodeValue());
         assertEquals("Servicio de usuarios no disponible", response.getBody().get("error"));
     }
+
+    @Test
+    void handleValidationExceptions_multipleErrors_returnsAllFieldErrors() {
+        FieldError error1 = new FieldError("user", "email", "Email inválido");
+        FieldError error2 = new FieldError("user", "password", "Contraseña requerida");
+
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(error1, error2));
+
+        MethodArgumentNotValidException ex = mock(MethodArgumentNotValidException.class);
+        when(ex.getBindingResult()).thenReturn(bindingResult);
+
+        ResponseEntity<Map<String, String>> response = handler.handleValidationExceptions(ex);
+
+        assertEquals(400, response.getStatusCodeValue());
+        assertEquals("Email inválido", response.getBody().get("email"));
+        assertEquals("Contraseña requerida", response.getBody().get("password"));
+    }
+
+    @Test
+    void handleFeignException_withOnlyStatus_returnsDefaultMessageAndParsedStatus() {
+        String json = """
+            {
+              "status": 401
+            }
+            """;
+
+        FeignException ex = mock(FeignException.class);
+        when(ex.contentUTF8()).thenReturn(json);
+
+        ResponseEntity<Map<String, String>> response = handler.handleFeignException(ex);
+
+        assertEquals(401, response.getStatusCodeValue());
+        assertEquals("Servicio de usuarios no disponible", response.getBody().get("error"));
+    }
+
+    @Test
+    void handleFeignException_withEmptyJson_returnsDefaultMessageAndStatus() {
+        String emptyJson = "{}";
+
+        FeignException ex = mock(FeignException.class);
+        when(ex.contentUTF8()).thenReturn(emptyJson);
+
+        ResponseEntity<Map<String, String>> response = handler.handleFeignException(ex);
+
+        assertEquals(503, response.getStatusCodeValue());
+        assertEquals("Servicio de usuarios no disponible", response.getBody().get("error"));
+    }
+
+
+
 }
