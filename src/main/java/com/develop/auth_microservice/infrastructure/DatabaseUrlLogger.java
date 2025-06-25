@@ -11,7 +11,7 @@ import java.sql.Connection;
 public class DatabaseUrlLogger {
 
     @Autowired
-    private DataSource dataSource;
+    public DataSource dataSource;
 
     @PostConstruct
     public void printDatabaseUrl() {
